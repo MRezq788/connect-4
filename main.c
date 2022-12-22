@@ -14,7 +14,7 @@ typedef struct{
 
 player player1, player2;
 
-int score(char grid[ROWS][COLS]){
+void score(char grid[ROWS][COLS]){
 	static turn = 0;
 	char disc[] = "XO"
 	int i, j;
@@ -52,8 +52,12 @@ int score(char grid[ROWS][COLS]){
 			}
 		}
 	}
+	if(turn == 0){
+		player1.score = score;
+	}else{
+		player2.score = score;
+	}
 	turn = 1 - turn;
-	return score;	
 }
 
 void print_grid()
