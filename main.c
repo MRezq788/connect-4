@@ -15,12 +15,14 @@ typedef struct{
 player player1, player2;
 
 int score(char grid[ROWS][COLS]){
+	static turn = 0;
+	char disc[] = "XO"
 	int i, j;
 	int score = 0;
 	//check horizontal
 	for(i = ROWS - 1; i >= 0; i--){
 		for(j = 0; j < (COLS - 3); j++){
-			if(grid[i][j] == player.disc && grid[i][j + 1] == player.disc && grid[i][j + 2] == player.disc && grid[i][j + 3] == player.disc){
+			if(grid[i][j] == disc[turn] && grid[i][j + 1] == disc[turn] && grid[i][j + 2] == disc[turn] && grid[i][j + 3] == disc[turn]){
 				score += 1;
 			}
 		}	
@@ -28,7 +30,7 @@ int score(char grid[ROWS][COLS]){
 	//check vertical
 	for(j = 0 ; j < COLS ; j++){
 		for(i = ROWS - 1; i > 2; i--){
-			if(grid[i][j] == player.disc && grid[i - 1][j] == player.disc && grid[i - 2][j] == player.disc && grid[i - 3][j] == player.disc){
+			if(grid[i][j] == disc[turn] && grid[i - 1][j] == disc[turn] && grid[i - 2][j] == disc[turn] && grid[i - 3][j] == disc[turn]){
 				score += 1;
 			}
 		}	
@@ -37,7 +39,7 @@ int score(char grid[ROWS][COLS]){
 	//check bottom left to right
 	for(i = ROWS - 1; i > 2; i--){
 		for(j = 0; j < COLS - 3; j++){
-			if(grid[i][j] == player.disc && grid[i - 1][j + 1] == player.disc && grid[i - 2][j + 2] == player.disc && grid[i - 3][j + 3] == player.disc){
+			if(grid[i][j] == disc[turn] && grid[i - 1][j + 1] == disc[turn] && grid[i - 2][j + 2] == disc[turn] && grid[i - 3][j + 3] == disc[turn]){
 				score += 1;
 			}
 		}
@@ -45,12 +47,12 @@ int score(char grid[ROWS][COLS]){
 	//check bottom right to left
 	for(i = ROWS - 1; i > 2; i--){
 		for(j = COLS - 1; j > 2 ; j--){
-			if(grid[i][j] == player.disc && grid[i - 1][j - 1] == player.disc && grid[i - 2][j - 2] == player.disc && grid[i - 3][j - 3] == player.disc){
+			if(grid[i][j] == disc[turn] && grid[i - 1][j - 1] == disc[turn] && grid[i - 2][j - 2] == disc[turn] && grid[i - 3][j - 3] == disc[turn]){
 				score += 1;
 			}
 		}
 	}
-	
+	turn = 1 - turn;
 	return score;	
 }
 
