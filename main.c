@@ -14,7 +14,7 @@ typedef struct{
 }player;
 
 player player1, player2;
-
+//score function >> evaluate score after each move 
 void score(char grid[ROWS][COLS]){
 	static turn = 0;
 	char disc[] = "XO";
@@ -60,19 +60,17 @@ void score(char grid[ROWS][COLS]){
 	}
 	turn = 1 - turn;
 }
- 
-int lastrow(int col){
-	static int lastrow[column];
-	memset(lastrow , 0 ,sizeof lastrow );
-	int i;
-	if(lastrow[col] == 0){
-		lastrow[col] = ROWS - 1;
-		return lastrow; 
+//last_row function >> returns index of last empty row in specific columns
+int last_row(int col/*users col*/, int lastrow[col]){
+	if(lastrow[col - 1] == 0){
+		lastrow[col - 1 ] = ROWS - 1;
+		return lastrow[col - 1]; 
 	}else{
-		return lastrow[col];
+		lastrow[col - 1] = lastrow[col - 1] - 1;
+		return lastrow[col - 1];
 	}
 }
-
+//print_grid function
 void print_grid()
 {
     int i ,j;
@@ -105,7 +103,8 @@ void print_grid()
 
 
 int main() {
-	
+	int lastrow[COLS];
+	memset(lastrow , 0 ,sizeof lastrow );
 	char grid[ROWS][COLS];
 	print_grid();
 	player1.disc = "X";
