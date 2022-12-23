@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define ROWS 6
 #define COLS 7
 
@@ -13,9 +14,7 @@ typedef struct{
 }player;
 
 player player1, player2;
-
-
-
+//score function >> evaluate score after each move
 void score(char grid[ROWS][COLS]){
 	static turn = 0;
 	char disc[] = "XO";
@@ -55,72 +54,91 @@ void score(char grid[ROWS][COLS]){
 		}
 	}
 	if(turn == 0){
-		player1.score = score;
+		player1.score += score;
 	}else{
-		player2.score = score;
+		player2.score += score;
 	}
 	turn = 1 - turn;
 }
-
-void print_grid()
+//last_row function >> returns index of last empty row in specific columns
+int last_row(int col/*users col*/, int lastrow[col]){
+	if(lastrow[col - 1] == 0){
+		lastrow[col - 1 ] = ROWS - 1;
+		return lastrow[col - 1];
+	}else{
+		lastrow[col - 1] = lastrow[col - 1] - 1;
+		return lastrow[col - 1];
+	}
+}
+//print_grid function
+void print_grid(char grid[ROWS][COLS])
 {
     int i ,j;
 
-    system("color f1");                     //TO COLOR THE BOARD
+    /*system("color f1");*/                   //TO COLOR THE BOARD
     for ( i = 0; i < ROWS; i++)
     {
         for ( j = 0; j < COLS; j++)
         {
-            printf("|---");
+            printf("+---");
         }
-        printf("|\n");
+        printf("+\n");
         for ( j = 0; j < COLS; j++)
         {
-            printf("|   ");
+            if(grid[i][j] != 'X' && grid[i][j] != 'O'  ){
+				printf("|   ");
+				}
+				else{
+					printf("| %c ", grid[i][j]);
+				}
+
         }
         printf("|\n");
     }
+    for ( j = 0; j < COLS; j++)
+        {
+            printf("+---");
+        }
+        printf("+\n");
 }
-int check_filled(int row,int n,int m,char a[n][m]){
-    int count = 0;
-    for(int i=0;i<m;i++){
-        if(a[row][i]!='X'||a[row][i]!='O')
-          count++;
+void move(char grid[ROWS][COLS]){
+    int static turn=0;
+    int lastr[COLS],col;
+    memset(lastr, 0 ,sizeof lastr);
+
+    int n=ROWS*COLS;
+
+    while(n!=0){
+        scanf("%d",&col);
+        int r=last_row(col,lastr);
+        printf("\n%d\n",r);
+        if(turn%2==0){
+        grid[r][col-1]='X';
+        print_grid(grid);
+        }
+        else{
+          grid[r][col-1]='O';
+          print_grid(grid);
+        }
+        turn++;
+        n--;
+        score(grid);
+        printf("player one's score is %d\n",player1.score);
+        printf("player two's score is %d\n",player1.score);
     }
-    return count;
 }
-void game(int row,int col,char grid[row][col]){
-  int n=row*col;
-  int R=row;
-  int R1 =R;
-  while(n!=0){
-    scanf("%d",&k);
-
-    if(check_filled(R,roww,coll,grid)==0){
-       R--;
-    }
-
-    if(k==temp){
-        grid[R1][k-1]='X';
-        print(roww,coll,grid);
-        R1--;
-    }
-    else{
-        grid[R][k-1]='X';
-        print(roww,coll,grid);
-    }
-    temp=k;
-    n--;
-  }
-
-}
-
 int main() {
 
-	char grid[ROWS][COLS];
-	print_grid();
-	player1.disc = "X";
-	player2.disc = "O";
+	int lastrow[COLS],col;
+	memset(lastrow , 0 ,sizeof lastrow );
 
-	return 0;
+	char grid[ROWS][COLS];
+
+	print_grid(grid);
+
+	player1.disc = 'X';
+	player2.disc = 'O';
+
+	move(grid);
+   return 0;
 }
