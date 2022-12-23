@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define ROWS 6
 #define COLS 7
 
@@ -16,7 +17,7 @@ player player1, player2;
 
 void score(char grid[ROWS][COLS]){
 	static turn = 0;
-	char disc[] = "XO"
+	char disc[] = "XO";
 	int i, j;
 	int score = 0;
 	//check horizontal
@@ -53,39 +54,62 @@ void score(char grid[ROWS][COLS]){
 		}
 	}
 	if(turn == 0){
-		player1.score = score;
+		player1.score += score;
 	}else{
-		player2.score = score;
+		player2.score += score;
 	}
 	turn = 1 - turn;
+}
+ 
+int lastrow(int col){
+	static int lastrow[column];
+	memset(lastrow , 0 ,sizeof lastrow );
+	int i;
+	if(lastrow[col] == 0){
+		lastrow[col] = ROWS - 1;
+		return lastrow; 
+	}else{
+		return lastrow[col];
+	}
 }
 
 void print_grid()
 {
     int i ,j;
-	system(" ");
-    printf("\033[0;31m");
+
+    system("color f1");                     //TO COLOR THE BOARD
     for ( i = 0; i < ROWS; i++)
     {
         for ( j = 0; j < COLS; j++)
         {
-            printf("|---");
+            printf("+---");
         }
-        printf("|\n");
+        printf("+\n");
         for ( j = 0; j < COLS; j++)
         {
-            printf("|   ");
+            if(grid[i][j] != "X" && grid[i][j] != "O"  ){
+				printf("|   ");
+				}else{
+					printf("| %c ", grid[i][j]);
+				}
+			
         }
         printf("|\n");
     }
+    for ( j = 0; j < COLS; j++)
+        {
+            printf("+---");
+        }
+        printf("+\n");
 }
+
 
 int main() {
 	
 	char grid[ROWS][COLS];
-	print_ grid();
+	print_grid();
 	player1.disc = "X";
-	plaer2.disc = "O";
+	player2.disc = "O";
 	
 	return 0;
 }
