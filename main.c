@@ -3,7 +3,7 @@
 #include <string.h>
 #define ROWS 6
 #define COLS 7
-
+char disc[] = "XO";
 typedef struct{
 
 	int num;
@@ -17,7 +17,7 @@ player player1, player2;
 //score function >> evaluate score after each move 
 void score(char grid[ROWS][COLS]){
 	static turn = 0;
-	char disc[] = "XO";
+
 	int i, j;
 	int score = 0;
 	//check horizontal
@@ -29,8 +29,8 @@ void score(char grid[ROWS][COLS]){
 		}	
 	}
 	//check vertical
-	for(j = 0 ; j < COLS ; j++){
-		for(i = ROWS - 1; i > 2; i--){
+	for(i = ROWS - 1; i > 2; i--){
+		for(j = 0 ; j < COLS ; j++){
 			if(grid[i][j] == disc[turn] && grid[i - 1][j] == disc[turn] && grid[i - 2][j] == disc[turn] && grid[i - 3][j] == disc[turn]){
 				score += 1;
 			}
@@ -71,11 +71,11 @@ int last_row(int col/*users col*/, int lastrow[col]){
 	}
 }
 //print_grid function
-void print_grid()
+void print_grid(char grid[ROWS][COLS])
 {
     int i ,j;
 
-    system("color f1");                     //TO COLOR THE BOARD
+    system("color a");                     //TO COLOR THE BOARD
     for ( i = 0; i < ROWS; i++)
     {
         for ( j = 0; j < COLS; j++)
@@ -85,7 +85,7 @@ void print_grid()
         printf("+\n");
         for ( j = 0; j < COLS; j++)
         {
-            if(grid[i][j] != "X" && grid[i][j] != "O"  ){
+            if(grid[i][j] != disc[0] && grid[i][j] != disc[1]  ){
 				printf("|   ");
 				}else{
 					printf("| %c ", grid[i][j]);
@@ -104,11 +104,9 @@ void print_grid()
 
 int main() {
 	int lastrow[COLS];
-	memset(lastrow , 0 ,sizeof lastrow );
+	memset(lastrow , 0 ,sizeof lastrow);
 	char grid[ROWS][COLS];
-	print_grid();
-	player1.disc = "X";
-	player2.disc = "O";
-	
+	print_grid(grid);
+
 	return 0;
 }
