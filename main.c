@@ -119,7 +119,18 @@ void move(){
         grid[last_row(col,lastr)][col-1]=disc[turn];
         print_grid();
 
-        if(disc[turn]==disc[0]){     //count moves
+		moves(turn);
+
+           //taking turns
+        n--;
+       	turn=1-turn; 
+	    printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
+        printf("P1 moves : %d  P2 moves: %d\n",player1.moves,player2.moves);
+    }
+}
+// moves count moves of each player
+void moves(int turn){
+	 if(disc[turn]==disc[0]){     //count moves
             player1.moves++;
             if(player1.moves % 4 == 0){
             	score();
@@ -130,14 +141,7 @@ void move(){
              if(player2.moves % 4 == 0){
             	score();
 			}
-        }
-
-           //taking turns
-        n--;
-       	turn=1-turn; 
-	    printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
-        printf("P1 moves : %d  P2 moves: %d\n",player1.moves,player2.moves);
-    }
+        }	
 }
 
 int main() {
