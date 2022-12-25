@@ -75,7 +75,7 @@ int last_row(int col/*users col*/, int lastrow[col]){
 void print_grid()
 {
     int i ,j;
-
+	printf("\e[1;H\e[2J");			//clear terminal
     printf("\033[0;32m");                    //TO COLOR THE BOARD
     for ( i = 0; i < ROWS; i++)
     {
@@ -101,9 +101,9 @@ void print_grid()
         }
         printf("+\n");
         printf("[u]Undo [r]Redo [e]Exit [s]Save \n\n");
-        
+        printf("\033[0;37m");   
         printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
-        printf("P1 moves : %d  P2 moves: %d\n",player1.moves,player2.moves);
+        printf("P1 moves : %d  P2 moves: %d\n\n",player1.moves,player2.moves);
 }
 
 // moves count moves of each player
@@ -155,13 +155,19 @@ void steering(int lastrow[COLS]){
 	//	}else if(wheel == -4 ){        //83  S    115  s
 	//		save();
 	//	}else
-		 if( wheel > 0 && wheel <= COLS /*&& grid[0][wheel - 1] == ' '*/){
+		 if( wheel > 0 && wheel <= COLS){
+				if(grid[0][wheel - 1] == '\0'){
 				fill_grid(wheel, lastrow);
 				turn = 1 - turn; 
 				break;
+				}else{
+			 printf("\033[0;31m");
+			 printf("THIS COLUMN IS FULL, PLEASE CHOOSE ANOTHER ONE:\n");
+			 scanf("%d", &wheel);	
+				}
 		}else{
 			 printf("\033[0;31m");
-			 printf("PLEASE ENTER VALID INPUT :\n");
+			 printf("PLEASE ENTER A VALID INPUT :\n");
 			 scanf("%d", &wheel);
 			
 		}
@@ -175,7 +181,7 @@ int main() {
 	int lastrow[COLS];
 	memset(lastrow, 0 ,sizeof lastrow);
 	int n = ROWS*COLS;
-	while(n!=0){
+	while(n>0){
 		print_grid();
 		steering(lastrow);
 		n--;
