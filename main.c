@@ -139,7 +139,7 @@ void fill_grid(int col/*users col*/, int lastrow[COLS]){
 	moves(turn); 
 	}
 
-void steering(int lastrow[COLS]){
+void steering(int lastrow[COLS],long start_time){
 
 	if(turn == 0){
 		printf("\033[0;35m");
@@ -152,7 +152,7 @@ void steering(int lastrow[COLS]){
 	
 	int wheel;
 	scanf("%d", &wheel);
-	
+	time(start_time);
 	while( wheel > -5){
 	
 	 
@@ -186,14 +186,34 @@ void steering(int lastrow[COLS]){
 //		}
 	}
 }
+ void timee(long t){
+    long time_now=time(NULL);
+    long time_passed = time_now - t;
+    long sec = time_passed % 60;
+    long min = time_passed / 60;
+    printf("\033[0;33m");
+    if(sec<10&&min<10){
+      printf("\nTimer 0%ld:0%ld\n",min,sec);
+    }
+    else if(sec>10&&min<10){
+      printf("\nTimer0%ld:%ld\n",min,sec);
+    }
+    else if(sec<10&&min>10){
+      printf("\nTimer%ld:0%ld\n",min,sec);
+    }
+    else{
+      printf("\nTimer%ld:%ld\n",min,sec);
+    }
+}
 
 int main() {
+	long start=time(NULL);
 	int lastrow[COLS];
 	memset(lastrow, 0 ,sizeof lastrow);
 	int n = ROWS*COLS;
 	while(n>0){
 		print_grid();
-		steering(lastrow);
+		steering(lastrow,start);
 		n--;
     }
 	return 0;
