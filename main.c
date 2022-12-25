@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
+#include <time.h>
 #define ROWS 6
 #define COLS 7
 int turn=0;
@@ -152,7 +153,7 @@ void steering(int lastrow[COLS],long start_time){
 	
 	int wheel;
 	scanf("%d", &wheel);
-	time(start_time);
+	timee(start_time);
 	while( wheel > -5){
 	
 	 
