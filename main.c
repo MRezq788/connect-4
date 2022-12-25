@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 #define ROWS 6
 #define COLS 7
-
+int turn=0;
 char disc[] = "XO";
 char grid[ROWS][COLS];
 typedef struct{
@@ -75,7 +76,7 @@ void print_grid()
 {
     int i ,j;
 
-    //system("color a");                     //TO COLOR THE BOARD
+    printf("\033[0;32m");                    //TO COLOR THE BOARD
     for ( i = 0; i < ROWS; i++)
     {
         for ( j = 0; j < COLS; j++)
@@ -99,35 +100,12 @@ void print_grid()
             printf("+---");
         }
         printf("+\n");
-}
-
-void move(){
-	int static turn=0;
-    
-	int lastr[COLS],col,counter;
-    memset(lastr, 0 ,sizeof lastr);
-    int n=ROWS*COLS;
-
-    while(n!=0){
-        printf("Player %d your turn:", turn +1);
-		scanf("%d",&col);
-        while(col>COLS){               //checking limits
-            printf("INVALID INPUT\n");
-            scanf("%d",&col);
-        }
-
-        grid[last_row(col,lastr)][col-1]=disc[turn];
-        print_grid();
-
-		moves(turn);
-
-           //taking turns
-        n--;
-       	turn=1-turn; 
-	    printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
+        printf("[u]Undo [r]Redo [e]Exit [s]Save \n\n");
+        
+        printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
         printf("P1 moves : %d  P2 moves: %d\n",player1.moves,player2.moves);
-    }
 }
+
 // moves count moves of each player
 void moves(int turn){
 	 if(disc[turn]==disc[0]){     //count moves
@@ -144,10 +122,63 @@ void moves(int turn){
         }	
 }
 
+
+// fill_grid 
+void fill_grid(int col/*users col*/, int lastrow[COLS]){
+    grid[last_row(col,lastrow)][col-1] = disc[turn];
+	moves(turn); 
+	}
+
+void steering(int lastrow[COLS]){
+
+	if(turn == 0){
+		printf("\033[0;35m");
+	}else{
+		printf("\033[0;36m");
+	}
+	
+	
+	printf("Player %d , your turn :\n", turn + 1);
+	
+	int wheel;
+	scanf("%d", &wheel);
+	
+	while( wheel > -5){
+	
+	 
+	//	if(wheel == -1){              // 85  U  117  u
+	//		undo();
+	//	}else if(wheel == -2 ){        //82  R   114  r
+	//		redo();
+	//	}else if(wheel == -3 ){         //69  E   101  e
+	//		exit();
+	//	}else if(wheel == -4 ){        //83  S    115  s
+	//		save();
+	//	}else
+		 if( wheel > 0 && wheel <= COLS /*&& grid[0][wheel - 1] == ' '*/){
+				fill_grid(wheel, lastrow);
+				turn = 1 - turn; 
+				break;
+		}else{
+			 printf("\033[0;31m");
+			 printf("PLEASE ENTER VALID INPUT :\n");
+			 scanf("%d", &wheel);
+			
+		}
+		//else{
+//			computer();
+//		}
+	}
+}
+
 int main() {
-	player1.score = 0;
-	player2.score =0;
-	print_grid();
-	move();
+	int lastrow[COLS];
+	memset(lastrow, 0 ,sizeof lastrow);
+	int n = ROWS*COLS;
+	while(n!=0){
+		print_grid();
+		steering(lastrow);
+		n--;
+    }
 	return 0;
 }
