@@ -73,9 +73,10 @@ int last_row(int col/*users col*/, int lastrow[col]){
 	}
 }
 //print_grid function
-void print_grid(){
+void print_grid(long t){
     int i ,j;
-	/*printf("\e[1;H\e[2J");*/			          //clear terminal
+    printf("\e[1;H\e[2J");    //clear terminal
+    timee(t);
     printf("\033[0;32m");                    //TO COLOR THE BOARD green
     for ( i = 0; i < ROWS; i++)
     {
@@ -140,7 +141,7 @@ void fill_grid(int col/*users col*/, int lastrow[COLS]){
 	moves(turn); 
 	}
 
-void steering(int lastrow[COLS],long start_time){
+void steering(int lastrow[COLS]){
 
 	if(turn == 0){
 		printf("\033[0;35m");
@@ -153,7 +154,6 @@ void steering(int lastrow[COLS],long start_time){
 	
 	int wheel;
 	scanf("%d", &wheel);
-	timee(start_time);
 	while( wheel > -5){
 	
 	 
@@ -213,8 +213,8 @@ int main() {
 	memset(lastrow, 0 ,sizeof lastrow);
 	int n = ROWS*COLS;
 	while(n>0){
-		print_grid();
-		steering(lastrow,start);
+		print_grid(start);
+		steering(lastrow);
 		n--;
     }
 	return 0;
