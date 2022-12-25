@@ -72,11 +72,10 @@ int last_row(int col/*users col*/, int lastrow[col]){
 	}
 }
 //print_grid function
-void print_grid()
-{
+void print_grid(){
     int i ,j;
-	printf("\e[1;H\e[2J");			//clear terminal
-    printf("\033[0;32m");                    //TO COLOR THE BOARD
+	printf("\e[1;H\e[2J");			          //clear terminal
+    printf("\033[0;32m");                    //TO COLOR THE BOARD green
     for ( i = 0; i < ROWS; i++)
     {
         for ( j = 0; j < COLS; j++)
@@ -89,7 +88,18 @@ void print_grid()
             if((grid[i][j] != disc[0] )&&( grid[i][j] != disc[1]  )){
 				printf("|   ");
 				}else{
-					printf("| %c ", grid[i][j]);
+					printf("| ");
+					
+					if(grid[i][j] == disc[0] ){
+						printf("\033[0;35m");
+						printf("%c ", grid[i][j]);
+					}else{
+						printf("\033[0;36m");
+						printf("%c ", grid[i][j]);
+					}
+					printf("\033[0;32m");                    //TO COLOR THE BOARD green
+					
+					
 				}
 			
         }
@@ -101,7 +111,7 @@ void print_grid()
         }
         printf("+\n");
         printf("[u]Undo [r]Redo [e]Exit [s]Save \n\n");
-        printf("\033[0;37m");   
+        printf("\033[0;37m");     // to color white 
         printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
         printf("P1 moves : %d  P2 moves: %d\n\n",player1.moves,player2.moves);
 }
@@ -157,13 +167,13 @@ void steering(int lastrow[COLS]){
 	//	}else
 		 if( wheel > 0 && wheel <= COLS){
 				if(grid[0][wheel - 1] == '\0'){
-				fill_grid(wheel, lastrow);
-				turn = 1 - turn; 
-				break;
+					fill_grid(wheel, lastrow);
+					turn = 1 - turn; 
+					break;
 				}else{
-			 printf("\033[0;31m");
-			 printf("THIS COLUMN IS FULL, PLEASE CHOOSE ANOTHER ONE:\n");
-			 scanf("%d", &wheel);	
+			 		printf("\033[0;31m");
+			 		printf("THIS COLUMN IS FULL, PLEASE CHOOSE ANOTHER ONE:\n");
+			 		scanf("%d", &wheel);	
 				}
 		}else{
 			 printf("\033[0;31m");
