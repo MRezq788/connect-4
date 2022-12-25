@@ -75,7 +75,7 @@ int last_row(int col/*users col*/, int lastrow[col]){
 //print_grid function
 void print_grid(){
     int i ,j;
-	printf("\e[1;H\e[2J");			          //clear terminal
+	/*printf("\e[1;H\e[2J");*/			          //clear terminal
     printf("\033[0;32m");                    //TO COLOR THE BOARD green
     for ( i = 0; i < ROWS; i++)
     {
