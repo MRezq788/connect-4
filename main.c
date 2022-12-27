@@ -1,21 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+//#include <windows.h>
 #include <time.h>
 #define ROWS 6
 #define COLS 7
 int turn=0;
-char disc[] = "XO";
+char disc[] = "XO ";
 char grid[ROWS][COLS];
+int savecol[COLS * ROWS] = {0};
+int saverow[COLS * ROWS] =  {0};
+int lastrow[COLS] = {0};
+int top = -1;
+
 typedef struct{
 	int moves;
 	char disc;
 	int score;
-	
 }player;
 
 player player1, player2;
+
 //score function >> evaluate score after each move 
 void score(){
 	static turn = 0;
@@ -62,8 +67,67 @@ void score(){
 	}
 	turn = 1 - turn;
 }
+//check grid full or not 
+int isfull(){
+	int j, counter = 0;
+	for(j = 0; j < COLS; j++ ){
+		if(grid[0][j] != '\0'){
+		counter++;
+		}
+	}
+	if(counter == COLS){
+		return 0;
+	}else{
+		return 1;
+		
+	}
+	
+}
+
+
+void undo(/*int col users col*/){	
+		grid[ saverow[ top ] ][ savecol[ top ] - 1 ] = '\0';
+		lastrow[ savecol[top] - 1 ] = lastrow[ savecol[top] - 1] + 1;
+		top--;
+		turn = 1 - turn;  
+		score();
+}
+//
+void redo(){
+		top++;
+		if(top %2 == 0){
+			grid[ saverow[top] ][ savecol[ top ] - 1] = disc[0];
+		}else{
+			grid[ saverow[top] ][ savecol[ top ] - 1] = disc[1];
+		}
+	    lastrow[ savecol[top] - 1 ] = lastrow[ savecol[top] - 1] - 1;
+		turn = 1 - turn;
+		score();
+}
+
+// print ellapsed time after each move
+ void timee(long t){
+    long time_now=time(NULL);
+    long time_passed = time_now - t;
+    long sec = time_passed % 60;
+    long min = time_passed / 60;
+    printf("\033[0;33m");
+    if(sec<10&&min<10){
+      printf("\nTimer 0%ld:0%ld\n",min,sec);
+    }
+    else if(sec>10&&min<10){
+      printf("\nTimer0%ld:%ld\n",min,sec);
+    }
+    else if(sec<10&&min>10){
+      printf("\nTimer%ld:0%ld\n",min,sec);
+    }
+    else{
+      printf("\nTimer%ld:%ld\n",min,sec);
+    }
+}
+
 //last_row function >> returns index of last empty row in specific columns
-int last_row(int col/*users col*/, int lastrow[col]){
+int last_row(int col/*users col*/){
 	if(lastrow[col - 1] == 0){
 		lastrow[col - 1 ] = ROWS - 1;
 		return lastrow[col - 1]; 
@@ -75,6 +139,7 @@ int last_row(int col/*users col*/, int lastrow[col]){
 //print_grid function
 void print_grid(long t){
     int i ,j;
+    system(" ");
     printf("\e[1;H\e[2J");    //clear terminal
     timee(t);
     printf("\033[0;32m");                    //TO COLOR THE BOARD green
@@ -112,7 +177,7 @@ void print_grid(long t){
             printf("+---");
         }
         printf("+\n");
-        printf("[u]Undo [r]Redo [e]Exit [s]Save \n\n");
+        printf("[-1]Undo [-2]Redo [e]Exit [s]Save \n\n");
         printf("\033[0;37m");     // to color white 
         printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
         printf("P1 moves : %d  P2 moves: %d\n\n",player1.moves,player2.moves);
@@ -122,53 +187,56 @@ void print_grid(long t){
 void moves(int turn){
 	 if(disc[turn]==disc[0]){     //count moves
             player1.moves++;
-            if(player1.moves % 4 == 0){
-            	score();
-			}
-        }
-        if(disc[turn]== disc[1]){
-            player2.moves++;
-             if(player2.moves % 4 == 0){
-            	score();
-			}
+            score();
+        }else if(disc[turn]== disc[1]){
+            	player2.moves++;
+        		score();	
         }	
 }
 
 
 // fill_grid 
-void fill_grid(int col/*users col*/, int lastrow[COLS]){
-    grid[last_row(col,lastrow)][col-1] = disc[turn];
-	moves(turn); 
+void fill_grid(int col/*users col*/){
+    grid[last_row(col)][col-1] = disc[turn];
+	top++;
+	savecol[ top ] = col;
+	saverow[ top ] = lastrow[ col - 1];
+	savecol[ top + 1 ] = 0;
+	saverow[ top + 1] = 0;
+	moves(turn);
 	}
 
-void steering(int lastrow[COLS]){
-
+void steering(){
 	if(turn == 0){
 		printf("\033[0;35m");
 	}else{
 		printf("\033[0;36m");
-	}
-	
-	
+	}	
 	printf("Player %d , your turn :\n", turn + 1);
-	
 	int wheel;
 	scanf("%d", &wheel);
 	while( wheel > -5){
-	
-	 
-	//	if(wheel == -1){              // 85  U  117  u
-	//		undo();
-	//	}else if(wheel == -2 ){        //82  R   114  r
-	//		redo();
-	//	}else if(wheel == -3 ){         //69  E   101  e
-	//		exit();
-	//	}else if(wheel == -4 ){        //83  S    115  s
-	//		save();
-	//	}else
-		 if( wheel > 0 && wheel <= COLS){
+		if(wheel == -1){              // 85  U  117  u
+			if(top > - 1 || savecol[top] > 0){
+				undo();
+				break;
+			}else{
+				printf("\033[0;31m");
+				printf("NO LAST MOVE, CAN'T USE UNDO, PLEASE ENTER ANOTHER INPUT:\n");
+	 			scanf("%d", &wheel);
+			}
+		}else if(wheel == -2 ){        //82  R   114  r
+			if(savecol[top + 1] != 0 ){
+				redo();
+				break;
+			}else{
+				printf("\033[0;31m");
+				printf("NO LAST MOVE TO REDO, PLEASE ENTER ANOTHER INPUT:\n");
+	 			scanf("%d", &wheel);
+			}				
+		}else if( wheel > 0 && wheel <= COLS){
 				if(grid[0][wheel - 1] == '\0'){
-					fill_grid(wheel, lastrow);
+					fill_grid(wheel);
 					turn = 1 - turn; 
 					break;
 				}else{
@@ -183,39 +251,20 @@ void steering(int lastrow[COLS]){
 			
 		}
 		//else{
-//			computer();
-//		}
+		//		computer();
 	}
-}
- void timee(long t){
-    long time_now=time(NULL);
-    long time_passed = time_now - t;
-    long sec = time_passed % 60;
-    long min = time_passed / 60;
-    printf("\033[0;33m");
-    if(sec<10&&min<10){
-      printf("\nTimer 0%ld:0%ld\n",min,sec);
-    }
-    else if(sec>10&&min<10){
-      printf("\nTimer0%ld:%ld\n",min,sec);
-    }
-    else if(sec<10&&min>10){
-      printf("\nTimer%ld:0%ld\n",min,sec);
-    }
-    else{
-      printf("\nTimer%ld:%ld\n",min,sec);
-    }
-}
 
-int main() {
+	//else if(wheel == -3 ){         //69  E   101  e
+	//		exit();
+	//	}else if(wheel == -4 ){        //83  S    115  s
+	//		save();
+	//	}else
+	}
+int main(){
 	long start=time(NULL);
-	int lastrow[COLS];
-	memset(lastrow, 0 ,sizeof lastrow);
-	int n = ROWS*COLS;
-	while(n>0){
+	while( isfull() ){
 		print_grid(start);
-		steering(lastrow);
-		n--;
+		steering();
     }
 	return 0;
 }
