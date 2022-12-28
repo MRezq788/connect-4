@@ -5,6 +5,7 @@
 #include <time.h>
 #define ROWS 6
 #define COLS 7
+int mode;
 int turn=0;
 char disc[] = "XO ";
 char grid[ROWS][COLS];
@@ -97,7 +98,9 @@ void undo(){
 		grid[ saverow[ top ] ][ savecol[ top ] - 1 ] = '\0';
 		lastrow[ savecol[top] - 1 ] = lastrow[ savecol[top] - 1] + 1;
 		top--;
-		turn = 1 - turn;
+	//	if(mode == 1){
+	//		turn = 1 - turn;
+	//	}
 		score();
 }
 
@@ -109,7 +112,9 @@ void redo(){
 			grid[ saverow[top] ][ savecol[ top ] - 1] = disc[1];
 		}
 	    lastrow[ savecol[top] - 1 ] = lastrow[ savecol[top] - 1] - 1;
-		turn = 1 - turn;
+	//	if(mode == 1){
+	//		turn = 1 - turn;
+	//	}
 		score();
 }
 
@@ -147,7 +152,8 @@ int last_row(int col){
 //print_grid function
 void print_grid(){
     int i ,j;
-    system ("cls");   //clear terminal
+    system (" ");
+	system ("cls");   //clear terminal
     timee();
     printf("\033[0;32m");                    //TO COLOR THE BOARD green
     for ( i = 0; i < ROWS; i++)
@@ -186,8 +192,13 @@ void print_grid(){
         printf("+\n");
         printf("[-1]Undo [-2]Redo [-3]Exit [-4]Save \n\n");
         printf("\033[0;37m");     // to color white
-        printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
-        printf("P1 moves : %d  P2 moves: %d\n\n",player1.moves,player2.moves);
+		if(mode == 1){
+			printf("P1 score : %d  P2 score: %d\n",player1.score,player2.score);
+        	printf("P1 moves : %d  P2 moves: %d\n\n",player1.moves,player2.moves);
+		}else{
+			printf("P1 score : %d  Computer score: %d\n",player1.score,player2.score);
+        	printf("P1 moves : %d  Computer moves: %d\n\n",player1.moves,player2.moves);
+		}
 }
 
 // moves count moves of each player
@@ -214,16 +225,22 @@ void fill_grid(int col){
 	}
 
 void steering(){
+	int wheel;
 	if(turn == 0){
 		printf("\033[0;35m");
 	}else{
 		printf("\033[0;36m");
 	}
-	printf("Player %d , your turn :\n", turn + 1);
-	int wheel;
-	scanf("%d", &wheel);
+	if((mode == 1) || (mode == 2 && turn == 0)){
+		printf("Player %d , your turn :\n", turn + 1);
+		scanf("%d", &wheel);
+	}else{
+		//computer will make a random move
+		srand(time(0));
+		wheel = (rand() % COLS) + 1;
+	}
 	while( wheel > -5){
-    if(wheel == -1){              // 85  U  117  u
+    	if(wheel == -1){  
 			if(top > - 1 || savecol[top] > 0){
 				undo();
 				break;
@@ -232,7 +249,7 @@ void steering(){
 				printf("NO LAST MOVE, CAN'T USE UNDO, PLEASE ENTER ANOTHER INPUT:\n");
 	 			scanf("%d", &wheel);
 			}
-		}else if(wheel == -2 ){        //82  R   114  r
+		}else if(wheel == -2 ){ 
 			if(savecol[top + 1] != 0 ){
 				redo();
 				break;
@@ -241,38 +258,37 @@ void steering(){
 				printf("NO LAST MOVE TO REDO, PLEASE ENTER ANOTHER INPUT:\n");
 	 			scanf("%d", &wheel);
 			}
-		}
-
-    else if(wheel == -3 ){
-		  printf("\n Are you sure you wanna exit?\n");
-		  printf("[1]yes [2] NO\n");
-          int exit;
-          scanf("%d",&exit);
-          if(exit==1){
-              system("cls");
-              start_menu();
-          }
-          else if (exit==2){
-            break;
-          }
-          else{
-             printf("\033[0;31m");
-			 printf("PLEASE ENTER A VALID INPUT :\n");
-          }
-	}else if(wheel == -4 ){        //83  S    115  s
+		}else if(wheel == -3 ){
+			printf("\n Are you sure you wanna exit?\n");
+		  	printf("[1]yes [2] NO\n");
+          	int exit;
+          	scanf("%d",&exit);
+          	if(exit==1){
+            	system("cls");
+            	start_menu();
+        	}else if (exit==2){
+            	break;
+        	}else{
+            	printf("\033[0;31m");
+				printf("PLEASE ENTER A VALID INPUT :\n");
+        }}else if(wheel == -4 ){   
 			save();
 			break;
-	//	}else
-	}
-    else if( wheel > 0 && wheel <= COLS){
+		}else if( wheel > 0 && wheel <= COLS){
 				if(grid[0][wheel - 1] == '\0'){
 					fill_grid(wheel);
 					turn = 1 - turn;
 					break;
 				}else{
-			 		printf("\033[0;31m");
-			 		printf("THIS COLUMN IS FULL, PLEASE CHOOSE ANOTHER ONE:\n");
-			 		scanf("%d", &wheel);
+			 		if((mode == 1 )|| (mode == 2 && turn == 0)){
+						printf("\033[0;31m");
+			 			printf("THIS COLUMN IS FULL, PLEASE CHOOSE ANOTHER ONE:\n");
+			 			scanf("%d", &wheel);	
+					}else{
+						//computer will make another random move
+						srand(time(0));
+						wheel = (rand() % COLS) + 1;
+					} 
 				}
 		}else{
 			 printf("\033[0;31m");
@@ -280,7 +296,7 @@ void steering(){
 			 scanf("%d", &wheel);
 
 		}
-  }
+	}
 }
 void game_loop(){
    if(load_indic==0){
@@ -299,7 +315,6 @@ void game_loop(){
 }
 void start_menu(){
     int select;
-    int mode;
     printf("\033[0;31m");
     printf("\nWELCOME TO CONNECT FOUR\n");
     printf("**************************\n");
@@ -318,9 +333,8 @@ void start_menu(){
                  printf("1 :Human VS Human\n");
                  printf("2 :Human VS Computer\n");
                  scanf("%d",&mode);
-                 if(mode==1){
-                    game_loop();
-                 }
+                    game_loop(mode);
+                 
                  break;
         case 2:load_indic=1;
                load();
@@ -335,21 +349,21 @@ void start_menu(){
 }
 
 void saving_process(FILE *file){
-    int i,j;
+    int ii, i, j;
     fprintf(file,"%d",player1.score);fprintf(file,"\n");
     fprintf(file,"%d",player2.score);fprintf(file,"\n");
     fprintf(file,"%d",player1.moves);fprintf(file,"\n");
     fprintf(file,"%d",player2.moves);fprintf(file,"\n");
     fprintf(file,"%d",timer.total);fprintf(file,"\n");
     fprintf(file,"%d",turn);fprintf(file,"\n");
-
-    for(int i=0;i<ROWS;i++){
+    
+    for( i=0;i<ROWS;i++){
         for(j=0;j<COLS;j++){
             fprintf(file,"%c",grid[i][j]);
              fprintf(file,"\n");
         }
     }
-    for(int ii=0;ii<COLS;ii++){
+    for(ii=0;ii<COLS;ii++){
            fprintf(file,"%d",lastrow[ii]);
            fprintf(file,"\n");
     }
@@ -385,14 +399,14 @@ void load_process(FILE *file){
         fscanf(file,"%d",&player2.moves);fscanf(file,"\n");
         fscanf(file,"%d",&timer.total);fscanf(file,"\n");
         fscanf(file,"%d",&turn);fscanf(file,"\n");
-        int i,j;
+        int ii, i, j;
         for(i=0;i<ROWS;i++){
             for(j=0;j<COLS;j++){
                 fscanf(file,"%c",&grid[i][j]);
                 fscanf(file,"\n");
             }
         }
-         for(int ii=0;ii<COLS;ii++){
+         for(ii=0;ii<COLS;ii++){
            fscanf(file,"%d",&lastrow[ii]);
            fscanf(file,"\n");
     }
@@ -462,8 +476,7 @@ void load(){
                 }
      }
 }
-void check_winner()
-{
+void check_winner(){
     if (player1.score>player2.score){
         printf("player 1 is the winner?\n");
         printf("player 1 name:\n");
