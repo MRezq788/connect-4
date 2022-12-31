@@ -3,8 +3,8 @@
 #include <string.h>
 #include <windows.h>
 #include <time.h>
-#define ROWS 6
-#define COLS 7
+#define ROWS 4
+#define COLS 4
 int mode;
 int turn=0;
 char disc[] = "XO ";
@@ -13,8 +13,9 @@ int savecol[COLS * ROWS] = {0};
 int saverow[COLS * ROWS] =  {0};
 int lastrow[COLS] = {0};
 int top = -1;
-int load_indic=0;
-
+int high_scores[100]={0};
+char names[100][40];
+ int counter=0;
 typedef struct{
 	int moves;
 	char disc;
@@ -240,7 +241,7 @@ void steering(){
 		wheel = (rand() % COLS) + 1;
 	}
 	while( wheel > -5){
-    	if(wheel == -1){  
+    	if(wheel == -1){
 			if(top > - 1 || savecol[top] > 0){
 				undo();
 				break;
@@ -249,7 +250,7 @@ void steering(){
 				printf("NO LAST MOVE, CAN'T USE UNDO, PLEASE ENTER ANOTHER INPUT:\n");
 	 			scanf("%d", &wheel);
 			}
-		}else if(wheel == -2 ){ 
+		}else if(wheel == -2 ){
 			if(savecol[top + 1] != 0 ){
 				redo();
 				break;
@@ -259,19 +260,21 @@ void steering(){
 	 			scanf("%d", &wheel);
 			}
 		}else if(wheel == -3 ){
-			printf("\n Are you sure you wanna exit?\n");
+			printf("\nAre you sure you wanna exit?\n");
 		  	printf("[1]yes [2] NO\n");
           	int exit;
           	scanf("%d",&exit);
           	if(exit==1){
             	system("cls");
+            	reset();
             	start_menu();
+            	break;
         	}else if (exit==2){
             	break;
         	}else{
             	printf("\033[0;31m");
 				printf("PLEASE ENTER A VALID INPUT :\n");
-        }}else if(wheel == -4 ){   
+        }}else if(wheel == -4 ){
 			save();
 			break;
 		}else if( wheel > 0 && wheel <= COLS){
@@ -283,12 +286,12 @@ void steering(){
 			 		if((mode == 1 )|| (mode == 2 && turn == 0)){
 						printf("\033[0;31m");
 			 			printf("THIS COLUMN IS FULL, PLEASE CHOOSE ANOTHER ONE:\n");
-			 			scanf("%d", &wheel);	
+			 			scanf("%d", &wheel);
 					}else{
 						//computer will make another random move
 						srand(time(0));
 						wheel = (rand() % COLS) + 1;
-					} 
+					}
 				}
 		}else{
 			 printf("\033[0;31m");
@@ -299,21 +302,14 @@ void steering(){
 	}
 }
 void game_loop(){
-   if(load_indic==0){
     timer.total=time(NULL);
    	while( isfull() ){
 		print_grid();
 		steering();
-    }
-   }
-   else{
-    	while( isfull() ){
-		print_grid();
-		steering();
-        }
-   }
+   	}
 }
 void start_menu(){
+    system("cls");
     int select;
     printf("\033[0;31m");
     printf("\nWELCOME TO CONNECT FOUR\n");
@@ -334,38 +330,32 @@ void start_menu(){
                  printf("2 :Human VS Computer\n");
                  scanf("%d",&mode);
                     game_loop(mode);
-                 
+
                  break;
-        case 2:load_indic=1;
-               load();
+        case 2:load();
                break;
 
-                /* else{
-
-                 }*/
-        case 4: exit(1);
+        case 3: printing_high_scores();
+        case 4: exit(0);
 
     }
 }
 
 void saving_process(FILE *file){
     int ii, i, j;
-    fprintf(file,"%d",player1.score);fprintf(file,"\n");
-    fprintf(file,"%d",player2.score);fprintf(file,"\n");
-    fprintf(file,"%d",player1.moves);fprintf(file,"\n");
-    fprintf(file,"%d",player2.moves);fprintf(file,"\n");
-    fprintf(file,"%d",timer.total);fprintf(file,"\n");
-    fprintf(file,"%d",turn);fprintf(file,"\n");
-    
+    fwrite(&player1.score,sizeof(player1.score),1,file);
+    fwrite(&player2.score,sizeof(player2.score),1,file);
+    fwrite(&player1.moves,sizeof(player1.moves),1,file);
+    fwrite(&player2.moves,sizeof(player2.moves),1,file);
+    fwrite(&turn,sizeof(turn),1,file);
+    fwrite(&mode,sizeof(mode),1,file);
     for( i=0;i<ROWS;i++){
         for(j=0;j<COLS;j++){
-            fprintf(file,"%c",grid[i][j]);
-             fprintf(file,"\n");
+            fwrite(&grid[i][j],sizeof(grid[i][j]),1,file);
         }
     }
     for(ii=0;ii<COLS;ii++){
-           fprintf(file,"%d",lastrow[ii]);
-           fprintf(file,"\n");
+           fwrite(&lastrow[ii],sizeof(lastrow[ii]),1,file);
     }
     fclose(file);
 }
@@ -393,22 +383,20 @@ void save(){
 }
 
 void load_process(FILE *file){
-        fscanf(file,"%d",&player1.score);fscanf(file,"\n");
-        fscanf(file,"%d",&player2.score);fscanf(file,"\n");
-        fscanf(file,"%d",&player1.moves);fscanf(file,"\n");
-        fscanf(file,"%d",&player2.moves);fscanf(file,"\n");
-        fscanf(file,"%d",&timer.total);fscanf(file,"\n");
-        fscanf(file,"%d",&turn);fscanf(file,"\n");
-        int ii, i, j;
-        for(i=0;i<ROWS;i++){
-            for(j=0;j<COLS;j++){
-                fscanf(file,"%c",&grid[i][j]);
-                fscanf(file,"\n");
-            }
+     int ii, i, j;
+    fread(&player1.score,sizeof(player1.score),1,file);
+    fread(&player2.score,sizeof(player2.score),1,file);
+    fread(&player1.moves,sizeof(player1.moves),1,file);
+    fread(&player2.moves,sizeof(player2.moves),1,file);
+    fread(&turn,sizeof(turn),1,file);
+    fread(&mode,sizeof(mode),1,file);
+    for( i=0;i<ROWS;i++){
+        for(j=0;j<COLS;j++){
+            fread(&grid[i][j],sizeof(grid[i][j]),1,file);
         }
-         for(ii=0;ii<COLS;ii++){
-           fscanf(file,"%d",&lastrow[ii]);
-           fscanf(file,"\n");
+    }
+    for(ii=0;ii<COLS;ii++){
+           fread(&lastrow[ii],sizeof(lastrow[ii]),1,file);
     }
     fclose(file);
     game_loop();
@@ -476,14 +464,35 @@ void load(){
                 }
      }
 }
+void reset(){
+    for(int i=0;i<ROWS;i++){
+        for(int j=0;j<COLS;j++){
+            grid[i][j]='\0';
+        }
+    }
+   for(int ii=0;ii<COLS;ii++){
+       lastrow[ii]=0;
+   }
+   for(int jj=0;jj<COLS*ROWS;jj++){
+       saverow[jj]=0;
+       savecol[jj]=0;
+   }
+    turn=0;
+    top = -1;
+    player1.moves=0;
+    player2.moves=0;
+    player1.score=0;
+    player2.score=0;
+
+}
 void check_winner(){
     if (player1.score>player2.score){
         printf("player 1 is the winner?\n");
         printf("player 1 name:\n");
         scanf("%s",player1.name);
     }
-     else if (player1.score>player2.score){
-        printf("player 2 is the winner?\n");
+     else if (player2.score>player1.score){
+        printf("player 2 is the winner\n");
         printf("player 2 name:\n");
         scanf("%s",player2.name);
     }
@@ -491,9 +500,151 @@ void check_winner(){
         printf("it's a draw");
     }
 }
+void newScore(){
+    int count=0;
+    FILE*nameFile;
+    FILE*scoreFile;
+    scoreFile=fopen("scores.bin","ab");
+    nameFile=fopen("players.bin","ab");
+    if (player1.score>player2.score){
+      for(int i=0;i<100;i++){
+        if(strcasecmp(names[i],player1.name)==0){
+            high_scores[i]=player1.score;
+            strcpy(names[i],player1.name);
+            count=1;
+            break;
+          }
+        }
+        if(count==0){
+         fprintf(scoreFile,"%d",player1.score);
+         fprintf(scoreFile,"\n");
+         fprintf(nameFile,"%s",player1.name);
+         fprintf(nameFile,"\n");
+         }
+    }
+     else if (player2.score>player1.score){
+        for(int i=0;i<100;i++){
+           if(strcasecmp(names[i],player2.name)==0){
+              high_scores[i]=player2.score;
+              strcpy(names[i],player2.name);
+              count=1;
+              break;
+             }
+        }
+        if(count==0){
+         fprintf(scoreFile,"%d",player2.score);
+         fprintf(scoreFile,"\n");
+         fprintf(nameFile,"%s",player2.name);
+         fprintf(nameFile,"\n");
+         }
+
+    }
+    fclose(nameFile);
+    fclose(scoreFile);
+}
+
+
+void sorting_scores(){
+
+    char temp_name[40];
+    FILE*scoreFile;
+    FILE*nameFile;
+    scoreFile=fopen("scores.bin","rb");
+    nameFile=fopen("players.bin","rb");
+    for (int i=0;i<100;i++){
+      fscanf(scoreFile,"%d",&high_scores[i]);
+      fscanf(scoreFile,"\n");
+      fscanf(nameFile,"%s",names[i]);
+      fscanf(nameFile,"\n");
+      }
+    for(int i=0;i<100;++i){
+       for(int j=i+1;j<100;++j){
+            if(high_scores[i]<high_scores[j]){
+               int temp=high_scores[i];
+               high_scores[i]=high_scores[j];
+               high_scores[j]=temp;
+
+                strcpy(temp_name,names[i]);
+                strcpy(names[i],names[j]);
+                strcpy(names[j],temp_name);
+            }
+       }
+    }
+    fclose(scoreFile);
+    fclose(nameFile);
+}
+void printing_high_scores(){
+    int mm;
+    for(int i=0;i<8;i++){
+        printf("[%d]%s     \tscore:%d",i+1,names[i],high_scores[i]);
+        printf("\n");
+    }
+    printf("\nEnter [1] to go back yo main menu\n");
+    scanf("%d",&mm);
+    if(mm==1){
+        start_menu();
+    }
+    else{
+      void printing_high_scores();
+    }
+}
+void sorting2()
+{
+    char temp_name[40];
+    for(int i=0;i<100;++i){
+       for(int j=i+1;j<100;++j){
+            if(high_scores[i]<high_scores[j]){
+               int temp=high_scores[i];
+               high_scores[i]=high_scores[j];
+               high_scores[j]=temp;
+
+                strcpy(temp_name,names[i]);
+                strcpy(names[i],names[j]);
+                strcpy(names[j],temp_name);
+            }
+       }
+    }
+}
+void modify_scores()
+{   FILE*scoreFile;
+    FILE*nameFile;
+    scoreFile=fopen("scores.bin","wb");
+    nameFile=fopen("players.bin","wb");
+     for (int i=0;i<100;i++){
+      fprintf(scoreFile,"%d",high_scores[i]);
+      fprintf(scoreFile,"\n");
+      fprintf(nameFile,"%s",names[i]);
+      fprintf(nameFile,"\n");
+      }
+    fclose(scoreFile);
+    fclose(nameFile);
+
+}
 
 int main(){
+    int cont;
+    sorting_scores();
 	start_menu();
 	check_winner();
+    newScore();
+    sorting2();
+    for(int i=0;i<100;i++){
+      if(high_scores[i]==player1.score){
+        printf("\nyour rank is %d",i+1);
+        break;
+      }
+    }
+    printf("\nDo you wanna go back to main menu?\n");
+    printf("[1]main menu\n[2]quit");
+    scanf("%d",&cont);
+       if(cont==1){
+           start_menu();
+      }
+       else if(cont ==2){
+           system("exit");
+      }
+
+
+    modify_scores();
     return 0;
 }
